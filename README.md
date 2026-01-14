@@ -34,7 +34,7 @@ Contains all data used in the generation of results, as well as intermediate and
 06 - 11 Contains the original demo notebooks used to create the results for the according publication. 
 
 ## `src/`
-Contains all functional modules of the repository. A complete description of all modules is provided in Appendix X.
+Contains all functional modules of the repository as well as the fuel cell model.
 
 ### Subdirectories
 
@@ -61,6 +61,7 @@ Contains all functional modules of the repository. A complete description of all
   Contains all visualization functions, including plotting polarization curves, parameter estimations, and parameter variations.
 
 # Usage
-Together, these modules enable execution of OED methods for parametric models. 
+Together, these modules give access to OED methods for parametric models. 
 They can be flexibly applied to different FC models, as well as other applications, given the models are present in a analytically closed form. For usage reference please refer to the example notebooks.
+
 
