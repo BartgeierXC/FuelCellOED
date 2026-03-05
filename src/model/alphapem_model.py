@@ -21,10 +21,12 @@ class AlphaPEMStackModel(AlphaPEM, FuelCellStackModel):
 
         :param parameter_set: An instance of ParameterSet containing the parameters for the model.
         """
-        super().__init__(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
         if parameter_set is None:
             parameter_set = ParameterSet()  # use the default parameter set
         self.parameter_set = parameter_set
+
+        super().__init__(parameter_set.cell_parameters, parameter_set.free_parameters,
+                         parameter_set.model_parameters) # !!!!!!!!!!!!!!! Can I initialise the simulator with the free_parameters ?
 
     def simulate_model(self, operating_inputs, simulation_parameters: ParameterSet = None):
         """
@@ -35,9 +37,13 @@ class AlphaPEMStackModel(AlphaPEM, FuelCellStackModel):
         :return: The results of the simulation (ie: voltage).
         """
 
-        super().simulate_model(operating_inputs, current_parameters, computing_parameters)
+        if simulation_parameters is None:
+            simulation_parameters = self.parameter_set
 
-        return {'U': self.variables['Ucell']} # This should be adjusted as it returns the cell voltage function of time, not current density.
+        super().simulate_model(operating_inputs, simulation_parameters.current_parameters,
+                               simulation_parameters.computing_parameters) # !!!!!!!!!!!!!!! Can I initialise the simulator with the current_parameters ?
+
+        return {'U': self.variables['Ucell']} # !!!!!!!!!!!!!! This should be adjusted as it returns the cell voltage function of time, not current density.
 
 
     def simulation_wrapper(self, scaler: ParameterScaler, x: np.ndarray, theta: np.ndarray,
@@ -54,3 +60,24 @@ class AlphaPEMStackModel(AlphaPEM, FuelCellStackModel):
 
     def __call__(self, *args, **kwargs):
         return self.simulation_wrapper(*args, **kwargs)
+
+
+if __name__ == '__main__':
+    from model.parameter_set.alphapem_parameter_set import AlphaPEMParameterSet
+    from alphapem.config import polarization_current
+
+    operating_inputs = {
+        'current_density': polarization_current,
+        'T_des': 68 + 273.15,
+        'Pa_des': 2.2e5,
+        'Pc_des': 2.0e5,
+        'Sa': 1.6,
+        'Sc': 1.6,
+        'Phi_a_des': 0.398,
+        'Phi_c_des': 0.50,
+        'y_H2_in': 0.7
+    }
+
+    p = AlphaPEMParameterSet()
+    x= AlphaPEMStackModel(p)
+    x.simulate_model(operating_inputs, p)

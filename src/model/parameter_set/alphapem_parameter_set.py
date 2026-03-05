@@ -1,6 +1,7 @@
 from src.model.parameter_set.interface.parameter_set import ParameterSet
 
-from alphapem.config.parameters import calculate_physical_parameters, calculate_computing_parameters
+from alphapem.config.parameters import calculate_physical_parameters, calculate_computing_parameters, \
+    calculate_current_density_parameters
 
 
 class AlphaPEMParameterSet(ParameterSet):
@@ -27,6 +28,11 @@ class AlphaPEMParameterSet(ParameterSet):
         type_display = "no_display"
         type_plot = "fixed"
 
+        #   Imposed inputs
+        (step_current_parameters, pola_current_parameters, pola_current_for_cali_parameters, i_EIS, ratio_EIS, f_EIS,
+         t_EIS, current_density) = calculate_current_density_parameters(type_current)
+        pola_current_parameters['i_max_pola'] = 2.5e4  # A.m-2. It is the maximum current density for the polarization curve.
+
         #   Physical parameters
         (Hacl, Hccl, Hmem, Hgdl, epsilon_gdl, epsilon_c, Hmpl, epsilon_mpl, Hagc, Hcgc, Wagc, Wcgc, Lgc,
          nb_channel_in_gc, Ldist, Lm, A_T_a, A_T_c, Vasm, Vcsm, Vaem, Vcem, Aact, nb_cell, e, K_l_ads, K_O2_ad_Pt, Re,
@@ -34,8 +40,8 @@ class AlphaPEMParameterSet(ParameterSet):
         #   Computing parameters
         nb_gc, nb_gdl, nb_mpl, t_purge, rtol, atol = calculate_computing_parameters()
 
+        # Accessible physical parameters
         cell_parameters = {
-            # Accessible physical parameters
             'Aact': Aact,
             'nb_cell': nb_cell,
             'Hagc': Hagc,
@@ -54,17 +60,32 @@ class AlphaPEMParameterSet(ParameterSet):
             'Vasm': Vasm,
             'Vcsm': Vcsm,
             'Vaem': Vaem,
-            'Vcem': Vcem,
+            'Vcem': Vcem
+        }
+        self.data['cell_parameters'] = cell_parameters
 
-            # Model parameters
+        current_parameters = {
+            'step_current_parameters': step_current_parameters,
+            'pola_current_parameters': pola_current_parameters,
+            'pola_current_for_cali_parameters': pola_current_for_cali_parameters,
+            'i_EIS': i_EIS,
+            'ratio_EIS': ratio_EIS,
+            't_EIS': t_EIS,
+            'f_EIS': f_EIS
+        }
+        self.data['current_parameters'] = current_parameters
+
+        model_parameters = {
             'nb_gc': nb_gc,
             'nb_gdl': nb_gdl,
             'nb_mpl': nb_mpl,
             't_purge': t_purge,
             'rtol': rtol,
-            'atol': atol,
+            'atol': atol
+        }
+        self.data['model_parameters'] = model_parameters
 
-            # Computing parameters
+        computing_parameters = {
             'type_fuel_cell': type_fuel_cell,
             'type_current': type_current,
             'voltage_zone': voltage_zone,
@@ -73,8 +94,7 @@ class AlphaPEMParameterSet(ParameterSet):
             'type_display': type_display,
             'type_plot': type_plot,
         }
-
-        self.data['cell_parameters'] = cell_parameters
+        self.data['computing_parameters'] = computing_parameters
 
         # Undetermined physical parameters
         default_free_parameters = {
@@ -92,10 +112,8 @@ class AlphaPEMParameterSet(ParameterSet):
             'kappa_co': kappa_co,
             'kappa_c': kappa_c,
         }
-
         # --- New unified logic ---
         # self.modify_free_parameters = []
-
         if free_parameters is None:
             # No modification — use defaults
             pass

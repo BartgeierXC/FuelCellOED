@@ -13,7 +13,7 @@ To install all necessary dependencies for the notebooks in this folder, follow t
 
 2. **Clone repository in desired directory**:
     ```sh
-    git clone https://github.com/BartgeierXC/FuelCellOED.git
+    git clone https://github.com/gassraphael/FuelCellOED.git
     ```
 
 3. **Install required packages**:
