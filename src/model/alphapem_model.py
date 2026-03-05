@@ -15,15 +15,30 @@ class AlphaPEMStackModel(AlphaPEM, FuelCellStackModel):
     This class should be inherited by specific fuel cell stack model implementations.
     """
 
-    def simulate_model(self, port_data, simulation_parameters: ParameterSet):
+    def __init__(self, parameter_set: ParameterSet = None):
         """
-        Simulates the fuel cell stack model with the given parameters.
+        Initializes the HahnStackModel with a given parameter set.
 
-        :param simulation_parameters: A ParameterSet containing the parameters for the simulation.
-        :param port_data: Additional data for the ports of the fuel cell stack.
-        :return: The results of the simulation.
+        :param parameter_set: An instance of ParameterSet containing the parameters for the model.
         """
-        raise NotImplementedError("This method should be implemented by subclasses.")
+        super().__init__(accessible_physical_parameters, undetermined_physical_parameters, model_parameters)
+        if parameter_set is None:
+            parameter_set = ParameterSet()  # use the default parameter set
+        self.parameter_set = parameter_set
+
+    def simulate_model(self, operating_inputs, simulation_parameters: ParameterSet = None):
+        """
+        Simulates AlphaPEM fuel cell stack model with the given parameters.
+
+        :param operating_inputs: A numpy array containing the reduced operating conditions for the simulation.
+        :param simulation_parameters: An optional ParameterSet containing the parameters for the simulation.
+        :return: The results of the simulation (ie: voltage).
+        """
+
+        super().simulate_model(operating_inputs, current_parameters, computing_parameters)
+
+        return {'U': self.variables['Ucell']} # This should be adjusted as it returns the cell voltage function of time, not current density.
+
 
     def simulation_wrapper(self, scaler: ParameterScaler, x: np.ndarray, theta: np.ndarray,
                            full_output: bool = False):
